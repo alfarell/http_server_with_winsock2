@@ -62,12 +62,11 @@ void HttpServer::handleRequest() {
     }
 
     int res;
-    const int bufflen = DEFAULT_BUFF_LEN;
-    char buffer[bufflen];
+    char buffer[DEFAULT_BUFF_LEN];
     std::string request;
 
     do {
-        res = recv(this->clientSocket, buffer, bufflen - 1, 0);
+        res = recv(this->clientSocket, buffer, DEFAULT_BUFF_LEN - 1, 0);
 
         if (res == 0) {
             std::cout << "Connection closed\n";
@@ -91,41 +90,31 @@ void HttpServer::handleRequest() {
     HttpRequest httpRequest = HttpRequest::requestParser(request);
 
     if (httpRequest.method == HTTP_GET) {
-        const char* body = "Hello from server!";
-        std::string response =
-            "HTTP/1.1 200 OK\r\n"
-            "Content-Type: text/plain\r\n"
-            "Content-Length: " +
-            std::to_string(strlen(body)) +
-            "\r\n"
-            "Connection: close\r\n"
-            "\r\n" +
-            std::string(body);
+        HttpResponse httpResponse;
+        httpResponse.setStatus(HttpStatus::OK);
+        httpResponse.addHeader("Content-Type: text/plain");
+        httpResponse.setBody("Hello from server!");
 
-        if (send(this->clientSocket, response.c_str(), (int)response.length(),
-                 0) == SOCKET_ERROR) {
-            std::cerr << "Send failed: " << WSAGetLastError() << "\n";
-            this->cleanup();
-
-            return;
-        }
+        this->sendResponse(httpResponse);
 
         return;
     }
 
-    std::string response =
-        "HTTP/1.1 405 Method Not Allowed\r\n"
-        "Content-Type: text/plain\r\n"
-        "Content-Length: 0\r\n"
-        "Connection: close\r\n"
-        "\r\n";
+    HttpResponse httpResponse;
+    httpResponse.setStatus(HttpStatus::MethodNotAllowed);
+    httpResponse.addHeader("Content-Type: text/plain");
+    httpResponse.setBody("");
 
-    if (send(this->clientSocket, response.c_str(), (int)response.length(), 0) ==
+    this->sendResponse(httpResponse);
+}
+
+void HttpServer::sendResponse(HttpResponse& response) {
+    std::string resp = response.getResponse();
+
+    if (send(this->clientSocket, resp.c_str(), resp.length(), 0) ==
         SOCKET_ERROR) {
         std::cerr << "Send failed: " << WSAGetLastError() << "\n";
         this->cleanup();
-
-        return;
     }
 }
 

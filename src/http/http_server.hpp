@@ -7,6 +7,7 @@
 #include <string>
 
 #include "http_request.hpp"
+#include "http_response.hpp"
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -22,6 +23,7 @@ class HttpServer {
    private:
     void handleRequest();
     void cleanup();
+    void sendResponse(HttpResponse& response);
 
    public:
     HttpServer();
