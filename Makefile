@@ -33,7 +33,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(call MKDIR,$(dir $@))
 	$(CC) -o $@ -c $<
 
-run-server:
+server:
 	./$(BUILD_APP)
 
 clean:
