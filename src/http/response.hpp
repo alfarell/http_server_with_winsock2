@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "http_core.hpp"
+#include "core.hpp"
 
 class HttpResponse {
    private:

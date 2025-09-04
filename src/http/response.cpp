@@ -1,4 +1,4 @@
-#include "http_response.hpp"
+#include "response.hpp"
 
 HttpResponse::HttpResponse() : status(HttpStatus::OK), headers(""), body("") {};
 

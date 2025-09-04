@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 
-#include "http/http_server.hpp"
+#include "http/server.hpp"
 
 #define SERVER_HOST "127.0.0.1"
 #define SERVER_PORT 8080

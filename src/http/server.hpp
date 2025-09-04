@@ -6,8 +6,8 @@
 #include <iostream>
 #include <string>
 
-#include "http_request.hpp"
-#include "http_response.hpp"
+#include "request.hpp"
+#include "response.hpp"
 
 #pragma comment(lib, "ws2_32.lib")
 
