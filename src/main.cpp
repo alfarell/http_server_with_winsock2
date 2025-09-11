@@ -9,10 +9,16 @@
 
 int main() {
     HttpRouter router{};
-    router.get("/test", [](HttpRequest, HttpResponse response) {
+    router.get("/", [](HttpRequest, HttpResponse response) {
         response.setStatus(HttpStatus::OK);
         response.addHeader("Content-Type: text/plain");
         response.setBody("Hello from server!");
+        response.sendResponse();
+    });
+    router.get("/test", [](HttpRequest, HttpResponse response) {
+        response.setStatus(HttpStatus::OK);
+        response.addHeader("Content-Type: text/plain");
+        response.setBody("/test path");
         response.sendResponse();
     });
 
