@@ -112,7 +112,9 @@ void HttpServer::handleRequest() {
     HttpResponse httpResponse = HttpResponse(&this->clientSocket);
 
     std::cout << "[" << httpRequest.method << "] ";
-    std::cout << httpRequest.path << "?" << httpRequest.search << "\n";
+    std::cout << httpRequest.path
+              << (httpRequest.search.length() ? "?" + httpRequest.search : "")
+              << "\n";
 
     this->router->callRoute(httpRequest, httpResponse);
 }
