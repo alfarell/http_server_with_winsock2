@@ -1,27 +1,80 @@
 #include "request.hpp"
 
+static inline std::string trim(const std::string& s) {
+    size_t start = s.find_first_not_of(" \t\r\n");
+    size_t end   = s.find_last_not_of(" \t\r\n");
+    if (start == std::string::npos || end == std::string::npos) return "";
+    return s.substr(start, end - start + 1);
+}
+
+std::map<std::string, std::string> parseQuery(const std::string& queryString) {
+    std::map<std::string, std::string> queryParams;
+    std::stringstream ss(queryString);
+    std::string pair;
+
+    while (std::getline(ss, pair, '&')) {
+        auto pos = pair.find('=');
+        if (pos != std::string::npos) {
+            std::string key   = pair.substr(0, pos);
+            std::string value = pair.substr(pos + 1);
+            queryParams[key]  = value;
+        } else {
+            queryParams[pair] = "";
+        }
+    }
+    return queryParams;
+}
+
 HttpRequest HttpRequest::requestParser(const std::string& request) {
     HttpRequest httpRequest;
 
-    if (request.empty()) {
-        return httpRequest;
+    std::istringstream stream(request);
+    std::string line;
+
+    // --- Request line ---
+    if (!std::getline(stream, line)) return httpRequest;
+    line = trim(line);
+
+    std::istringstream urlLine(line);
+    urlLine >> httpRequest.method;
+
+    // --- Path ---
+    std::string url;
+    urlLine >> url;
+    urlLine >> httpRequest.version;
+
+    // --- Query Param ---
+    std::string::size_type qpos = url.find('?');
+    if (qpos != std::string::npos) {
+        httpRequest.path    = url.substr(0, qpos);
+        httpRequest.search  = url.substr(qpos + 1);
+        httpRequest.queries = parseQuery(httpRequest.search);
+    } else {
+        httpRequest.path = url;
     }
 
-    size_t method_end  = request.find(' ');
-    httpRequest.method = request.substr(0, method_end);
+    // --- Headers ---
+    while (std::getline(stream, line)) {
+        line = trim(line);
+        if (line.empty()) break;
 
-    size_t path_end = request.find('?', method_end + 1);
-    httpRequest.path =
-        request.substr(method_end + 1, path_end - method_end - 1);
+        auto pos = line.find(':');
+        if (pos != std::string::npos) {
+            std::string key          = trim(line.substr(0, pos));
+            std::string value        = trim(line.substr(pos + 1));
+            httpRequest.headers[key] = value;
+        }
+    }
 
-    size_t query_end = request.find(' ', path_end + 1);
-    httpRequest.path = request.substr(path_end + 1, query_end - path_end - 1);
-
-    size_t headers_end = request.find(HTTP_REQUEST_HEADER_EOF);
-    httpRequest.headers =
-        request.substr(query_end + 1, headers_end - query_end - 1);
-
-    httpRequest.body = request.substr(headers_end + 4);
+    // --- Body ---
+    std::string body;
+    while (std::getline(stream, line)) {
+        body += line + "\n";
+    }
+    if (!body.empty() && body.back() == '\n') {
+        body.pop_back();
+    }
+    httpRequest.body = body;
 
     return httpRequest;
 }
