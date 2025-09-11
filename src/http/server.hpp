@@ -8,6 +8,7 @@
 
 #include "request.hpp"
 #include "response.hpp"
+#include "router.hpp"
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -19,15 +20,18 @@ class HttpServer {
     SOCKET listenSocket;
     SOCKET clientSocket;
     sockaddr_in serverAddr;
+    bool isRunning;
+
+    const HttpRouter* router;
 
    private:
     void handleRequest();
     void cleanup();
-    void sendResponse(HttpResponse& response);
 
    public:
     HttpServer();
     ~HttpServer();
 
     void startServer(const char* host, int port);
+    void setRouter(const HttpRouter& router);
 };

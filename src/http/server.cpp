@@ -4,7 +4,8 @@ HttpServer::HttpServer()
     : wsaData(),
       listenSocket(INVALID_SOCKET),
       clientSocket(INVALID_SOCKET),
-      serverAddr() {}
+      serverAddr(),
+      router(nullptr) {}
 
 HttpServer::~HttpServer() {
     this->cleanup();
@@ -46,10 +47,13 @@ void HttpServer::startServer(const char* host, int port) {
     }
 
     std::cout << "Server listening on port " << port << "...\n";
+    this->isRunning = true;
 
-    while (true) {
+    while (this->isRunning) {
         this->handleRequest();
     }
+
+    this->cleanup();
 }
 
 void HttpServer::handleRequest() {
@@ -57,6 +61,18 @@ void HttpServer::handleRequest() {
     if (this->clientSocket == INVALID_SOCKET) {
         std::cerr << "Accept failed: " << WSAGetLastError() << "\n";
         this->cleanup();
+
+        return;
+    }
+
+    if (this->router == nullptr) {
+        std::cerr << "Router is not set.\n";
+
+        HttpResponse response = HttpResponse(&this->clientSocket);
+        response.setStatus(HttpStatus::OK);
+        response.addHeader("Content-Type: text/plain");
+        response.setBody("");
+        response.sendResponse();
 
         return;
     }
@@ -87,39 +103,27 @@ void HttpServer::handleRequest() {
         }
     } while (res > 0);
 
-    HttpRequest httpRequest = HttpRequest::requestParser(request);
-
-    if (httpRequest.method == HTTP_GET) {
-        HttpResponse httpResponse;
-        httpResponse.setStatus(HttpStatus::OK);
-        httpResponse.addHeader("Content-Type: text/plain");
-        httpResponse.setBody("Hello from server!");
-
-        this->sendResponse(httpResponse);
+    if (request.empty()) {
+        std::cerr << "Request is empty.\n";
 
         return;
     }
 
-    HttpResponse httpResponse;
-    httpResponse.setStatus(HttpStatus::MethodNotAllowed);
-    httpResponse.addHeader("Content-Type: text/plain");
-    httpResponse.setBody("");
+    HttpRequest httpRequest   = HttpRequest::requestParser(request);
+    HttpResponse httpResponse = HttpResponse(&this->clientSocket);
 
-    this->sendResponse(httpResponse);
-}
-
-void HttpServer::sendResponse(HttpResponse& response) {
-    std::string resp = response.getResponse();
-
-    if (send(this->clientSocket, resp.c_str(), resp.length(), 0) ==
-        SOCKET_ERROR) {
-        std::cerr << "Send failed: " << WSAGetLastError() << "\n";
-        this->cleanup();
-    }
+    std::cout << "[" << httpRequest.method << "] Path: " << httpRequest.path
+              << " Query: " << httpRequest.query << "\n";
+    this->router->callRoute(httpRequest, httpResponse);
 }
 
 void HttpServer::cleanup() {
+    this->isRunning = false;
     closesocket(this->listenSocket);
     closesocket(this->clientSocket);
     WSACleanup();
+}
+
+void HttpServer::setRouter(const HttpRouter& router) {
+    this->router = &router;
 }

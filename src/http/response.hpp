@@ -1,21 +1,27 @@
 #pragma once
 
+#include <winsock2.h>
+
+#include <iostream>
 #include <string>
 
 #include "core.hpp"
 
 class HttpResponse {
    private:
-    HttpStatus status;
-    std::string headers;
-    std::string body;
+    mutable HttpStatus status;
+    mutable std::string headers;
+    mutable std::string body;
+
+    SOCKET* clientSocket;
 
    public:
-    HttpResponse();
+    HttpResponse(SOCKET* clientSocket);
     ~HttpResponse();
 
-    void setStatus(HttpStatus status);
-    void addHeader(const std::string& headers);
-    void setBody(const std::string& body);
-    std::string getResponse();
+    void setStatus(HttpStatus status) const;
+    void addHeader(const std::string& headers) const;
+    void setBody(const std::string& body) const;
+    void sendResponse() const;
+    std::string getResponse() const;
 };
