@@ -12,7 +12,6 @@ HttpServer::~HttpServer() {
 }
 
 void HttpServer::startServer(const char* host, int port) {
-    this->wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &this->wsaData) != 0) {
         std::cerr << "WSAStartup failed.\n";
 

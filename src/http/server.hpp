@@ -10,8 +10,6 @@
 #include "response.hpp"
 #include "router.hpp"
 
-#pragma comment(lib, "ws2_32.lib")
-
 #define DEFAULT_BUFF_LEN 1024
 
 class HttpServer {
