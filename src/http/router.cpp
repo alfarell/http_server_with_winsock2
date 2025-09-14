@@ -36,8 +36,8 @@ void HttpRouter::callRoute(const HttpRequest& request,
         }
     }
 
-    response.setStatus(HttpStatus::NotFound);
-    response.addHeader("Content-Type: text/plain");
-    response.setBody("Page Not Found");
-    response.sendResponse();
+    response.setStatus(HttpStatus::NotFound)
+        .addHeader("Content-Type: text/plain")
+        .writeBody("Page Not Found")
+        .sendResponse();
 }

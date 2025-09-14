@@ -15,13 +15,14 @@ class HttpResponse {
 
     SOCKET* clientSocket;
 
+    std::string responseString() const;
+
    public:
     HttpResponse(SOCKET* clientSocket);
     ~HttpResponse();
 
-    void setStatus(HttpStatus status) const;
-    void addHeader(const std::string& headers) const;
-    void setBody(const std::string& body) const;
+    const HttpResponse& setStatus(HttpStatus status) const;
+    const HttpResponse& addHeader(const std::string& headers) const;
+    const HttpResponse& writeBody(const std::string& body) const;
     void sendResponse() const;
-    std::string getResponse() const;
 };

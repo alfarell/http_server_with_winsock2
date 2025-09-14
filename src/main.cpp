@@ -9,17 +9,17 @@
 
 int main() {
     HttpRouter router{};
-    router.get("/", [](HttpRequest, HttpResponse response) {
-        response.setStatus(HttpStatus::OK);
-        response.addHeader("Content-Type: text/plain");
-        response.setBody("Hello from server!");
-        response.sendResponse();
+    router.get("/", [](const HttpRequest&, const HttpResponse& response) {
+        response.setStatus(HttpStatus::OK)
+            .addHeader("Content-Type: text/plain")
+            .writeBody("Hello from server!")
+            .sendResponse();
     });
-    router.get("/test", [](HttpRequest, HttpResponse response) {
-        response.setStatus(HttpStatus::OK);
-        response.addHeader("Content-Type: text/plain");
-        response.setBody("/test path");
-        response.sendResponse();
+    router.get("/test", [](const HttpRequest&, const HttpResponse& response) {
+        response.setStatus(HttpStatus::OK)
+            .addHeader("Content-Type: text/plain")
+            .writeBody("/test path")
+            .sendResponse();
     });
 
     HttpServer server = HttpServer();

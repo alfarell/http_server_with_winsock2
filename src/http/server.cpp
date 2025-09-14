@@ -68,10 +68,10 @@ void HttpServer::handleRequest() {
         std::cerr << "Router is not set.\n";
 
         HttpResponse response = HttpResponse(&this->clientSocket);
-        response.setStatus(HttpStatus::OK);
-        response.addHeader("Content-Type: text/plain");
-        response.setBody("");
-        response.sendResponse();
+        response.setStatus(HttpStatus::OK)
+            .addHeader("Content-Type: text/plain")
+            .writeBody("")
+            .sendResponse();
 
         return;
     }

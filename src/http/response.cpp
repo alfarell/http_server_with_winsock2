@@ -8,19 +8,25 @@ HttpResponse::HttpResponse(SOCKET* clientSocket)
 
 HttpResponse::~HttpResponse() {}
 
-void HttpResponse::setStatus(HttpStatus status) const {
+const HttpResponse& HttpResponse::setStatus(HttpStatus status) const {
     this->status = status;
+
+    return *this;
 }
 
-void HttpResponse::addHeader(const std::string& headers) const {
+const HttpResponse& HttpResponse::addHeader(const std::string& headers) const {
     this->headers += headers + "\r\n";
+
+    return *this;
 }
 
-void HttpResponse::setBody(const std::string& body) const {
+const HttpResponse& HttpResponse::writeBody(const std::string& body) const {
     this->body = body;
+
+    return *this;
 }
 
-std::string HttpResponse::getResponse() const {
+std::string HttpResponse::responseString() const {
     std::string statusText = httpStatusToString(this->status);
     std::string response =
         "HTTP/1.1 " + statusText + "\r\n" + this->headers +
@@ -31,7 +37,7 @@ std::string HttpResponse::getResponse() const {
 }
 
 void HttpResponse::sendResponse() const {
-    std::string resp = this->getResponse();
+    std::string resp = this->responseString();
 
     if (send(*this->clientSocket, resp.c_str(), resp.length(), 0) ==
         SOCKET_ERROR) {
